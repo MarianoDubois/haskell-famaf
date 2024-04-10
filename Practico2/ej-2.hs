@@ -10,10 +10,6 @@ c) mayoresQue :: Int-> [Int] -> [Int], que dado un entero n y una lista de enter
 una lista sólo con los números mayores que n contenidos en xs,
 Por ejemplo: mayoresQue 2 [3,0,-2, 12] = [3,12]
 -}
-soloPares :: [Int] -> [Int]
-soloPares [] = []
-soloPares (x:xs) | even x    = x : soloPares xs
-                 | otherwise = soloPares xs 
 
 maximo :: [Int] -> Int
 maximo [] = error "empty list"
@@ -40,3 +36,11 @@ takear :: Int -> [a] -> [a]
 takear 0 xs = []
 takear n [] = []
 takear n (x:xs) = x : takear(n-1) xs
+
+par :: Int -> Bool
+par x = mod x 2 == 0
+
+soloPares :: [Int] -> [Int]
+soloPares [] = []
+soloPares (x:xs) | par x    = x : soloPares xs
+                 | otherwise = soloPares xs 
