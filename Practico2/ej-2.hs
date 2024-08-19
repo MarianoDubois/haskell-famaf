@@ -44,3 +44,35 @@ soloPares :: [Int] -> [Int]
 soloPares [] = []
 soloPares (x:xs) | par x    = x : soloPares xs
                  | otherwise = soloPares xs 
+
+casiCuadrado :: Int -> Int
+casiCuadrado x = 2*x^2+4
+
+maximoDistinto :: Int -> Int -> Int
+maximoDistinto x y | x <= y = y
+                   | x > y = x
+
+{-
+disc :: Num -> Num -> Num -> Num
+disc a b c = b^2-4*a*c
+
+cuadratica :: Num -> Num -> Num -> Num
+cuadratica a b c = -b+(sqrt(disc a b c))/2*a
+-}
+
+factorial :: Int -> Int
+factorial 0 = 1
+factorial 1 = 1
+factorial n = n * factorial (n-1)
+
+sumarTodo :: [Int] -> Int
+sumarTodo [] = 0
+sumarTodo(x:xs) =  x + sumarTodo xs
+
+sumarTodoLista :: [Int] -> [Int]
+sumarTodoLista [] = [0]
+sumarTodoLista(x:xs) = [x + sum | sum <- sumarTodoLista xs]
+
+entre0y9 :: Int -> Bool
+entre0y9 x | x >= 0 && x <= 9 = True
+           | otherwise = False
