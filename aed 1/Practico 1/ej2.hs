@@ -102,3 +102,8 @@ contar_velocistas :: [Deportista] -> Int
 contar_velocistas [] = 0
 contar_velocistas ((Velocista x):xs) = 1 + contar_velocistas xs
 contar_velocistas (x:xs) = 0 + contar_velocistas xs
+
+contarVelocistasAltos :: [Deportista] -> Int
+contarVelocistasAltos [] = 0
+contarVelocistasAltos ((Velocista x):xs) | x>=170 = 1 + contarVelocistasAltos xs | 0 + contarVelocistasAltos xs
+contarVelocistasAltos (x:xs) = contarVelocistasAltos xs
