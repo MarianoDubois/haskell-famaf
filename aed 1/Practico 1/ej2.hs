@@ -2,7 +2,9 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use camelCase" #-}
+{-# HLINT ignore "Use foldr" #-}
 import GHC.Base (TrName)
+import Prelude hiding (pi)
 
 
 -----------------------------------------------------------{ 2 }----------------------------------------------------------------------------
@@ -20,6 +22,8 @@ titulo Astronomia = "Lic en astronomia"
 data NotaBasica = Do | Re | Mi | Fa | Sol | La | Si --tipo de dato finito
   deriving Eq                                       --actividad numero 3 a
   deriving Ord
+  deriving Bounded
+  deriving Show
 
 --d
 cifradoAmericano :: NotaBasica -> Char
@@ -78,6 +82,24 @@ data NotaBasica = Do | Re | Mi | Fa | Sol | La | Si
   deriving Ord
   deriving Bounded -}
 
+------------------------------------------------------{ 4 }-------------------------------------------------------------------------------
+--a
+{-
+minimoElemento :: Ord a => [a] -> a
+minimoElemento [x] = x
+minimoElemento (x:xs) =
+  let minRest = minimoElemento xs
+  in if x <= minRest then x else minRest
+-}
+minimoElemento :: Ord a => [a] -> a
+minimoElemento [x] = x
+minimoElemento (x:xs) = min x (minimoElemento xs)
+
+minimoElemento' :: (Ord a, Bounded a, Show a) => [a] -> a
+minimoElemento' [] = maxBound
+minimoElemento' (x:xs) = min x (minimoElemento' xs)
+
+
 ------------------------------------------------------{ 5 }-------------------------------------------------------------------------------
 --a
 type Altura = Int
@@ -95,7 +117,7 @@ data Deportista = Ajedrecista | Ciclista Modalidad | Velocista Altura | Tenista 
   deriving Ord
 
 --b
-
+--el tipo de constructor con un solo parametro? Parametrico? deportista int??? tupla de datos???
 
 --c 
 contar_velocistas :: [Deportista] -> Int
@@ -105,5 +127,42 @@ contar_velocistas (x:xs) = 0 + contar_velocistas xs
 
 contarVelocistasAltos :: [Deportista] -> Int
 contarVelocistasAltos [] = 0
-contarVelocistasAltos ((Velocista x):xs) | x>=170 = 1 + contarVelocistasAltos xs | 0 + contarVelocistasAltos xs
-contarVelocistasAltos (x:xs) = contarVelocistasAltos xs
+contarVelocistasAltos ((Velocista x):xs)
+  | x >= 170  = 1 + contarVelocistasAltos xs
+  | otherwise = contarVelocistasAltos xs
+contarVelocistasAltos (_:xs) = contarVelocistasAltos xs
+
+--d
+contar_futbolistas :: [Deportista] -> Zona -> Int
+contar_futbolistas [] _ = 0
+contar_futbolistas ((Futbolista x y w v):xs) z | z==x = 1+contar_futbolistas xs z
+                                               | otherwise = contar_futbolistas xs z
+contar_futbolistas (_:xs) z = contar_futbolistas xs z
+
+--e
+contar_futbolistas' :: [Deportista] -> Zona -> Int
+contar_futbolistas' [] _ = 0
+contar_futbolistas' xs z = length (filter esFutbolistaEnZona xs)
+  where esFutbolistaEnZona :: Deportista -> Bool
+        esFutbolistaEnZona (Futbolista zona _ _ _) = z == zona
+        esFutbolistaEnZona _ = False
+
+--------------------------------------------------{ 6 }------------------------------------------------------------------------------------
+--a
+sumPotencias :: Int -> Int -> Int
+sumPotencias _ 0 = 1
+sumPotencias x i = x^i + sumPotencias x (i-1)
+
+--b
+pi :: Int -> Float
+pi 0 = (-1) ** 0 / (2 * 0 + 1)
+pi i = 4* ( (((-1) ** fromIntegral i)/fromIntegral (2* i + 1 )) + pi (i-1) )
+
+piAprox :: Int -> Float
+piAprox 0 = 0
+piAprox n = 4 * sumatoria n
+
+sumatoria :: Int -> Float
+sumatoria 0 = (-1) ** 0 / (2 * 0 + 1)
+sumatoria i = (-1) ** fromIntegral i / fromIntegral (2 * i + 1) + sumatoria (i - 1)
+
