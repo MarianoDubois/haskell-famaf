@@ -3,8 +3,10 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use camelCase" #-}
 {-# HLINT ignore "Use foldr" #-}
-import GHC.Base (TrName)
+{-# LANGUAGE BlockArguments #-}
+import GHC.Base (TrName, VecElem (Int16ElemRep), absentErr)
 import Prelude hiding (pi)
+import System.Win32 (xBUTTON1)
 
 
 -----------------------------------------------------------{ 2 }----------------------------------------------------------------------------
@@ -105,16 +107,17 @@ minimoElemento' (x:xs) = min x (minimoElemento' xs)
 type Altura = Int
 type NumCamiseta = Int
 
-data Zona = Arco | Defensa | Mediocampo | Delantera   deriving Eq deriving Ord
-data TipoReves = DosManos | UnaMano deriving Eq deriving Ord
-data Modalidad = Carretera | Pista | Monte | BMX deriving Eq deriving Ord
-data PiernaHabil = Izquierda | Derecha deriving Eq deriving Ord
+data Zona = Arco | Defensa | Mediocampo | Delantera   deriving Eq deriving Ord deriving Show
+data TipoReves = DosManos | UnaMano deriving Eq deriving Ord deriving Show
+data Modalidad = Carretera | Pista | Monte | BMX deriving Eq deriving Ord deriving Show
+data PiernaHabil = Izquierda | Derecha deriving Eq deriving Ord deriving Show
 
 type ManoHabil = PiernaHabil
 
 data Deportista = Ajedrecista | Ciclista Modalidad | Velocista Altura | Tenista TipoReves ManoHabil Altura | Futbolista Zona NumCamiseta PiernaHabil Altura
   deriving Eq
   deriving Ord
+  deriving Show
 
 --b
 --el tipo de constructor con un solo parametro? Parametrico? deportista int??? tupla de datos???
@@ -154,6 +157,7 @@ sumPotencias _ 0 = 1
 sumPotencias x i = x^i + sumPotencias x (i-1)
 
 --b
+{-
 pi :: Int -> Float
 pi 0 = (-1) ** 0 / (2 * 0 + 1)
 pi i = 4* ( (((-1) ** fromIntegral i)/fromIntegral (2* i + 1 )) + pi (i-1) )
@@ -165,4 +169,82 @@ piAprox n = 4 * sumatoria n
 sumatoria :: Int -> Float
 sumatoria 0 = (-1) ** 0 / (2 * 0 + 1)
 sumatoria i = (-1) ** fromIntegral i / fromIntegral (2 * i + 1) + sumatoria (i - 1)
+-}
 
+pi' :: Int -> Float
+pi' n = 4 * sumatoriaDePi (n-1)
+  where
+    sumatoriaDePi :: Int -> Float
+    sumatoriaDePi 0 = 1 -- El primer término es 1, cuando i = 0
+    sumatoriaDePi x = exp'' x + sumatoriaDePi (x - 1)
+
+    exp'' :: Int -> Float
+    exp'' z = ((-1) ** fromIntegral z) / fromIntegral (2 * z + 1)
+
+--c
+
+-------------------------------------------------------{ 11 }------------------------------------------------------------------------------
+
+--------------------------------------------------[ clase 16/09/24 ]-----------------------------------------------------------------------
+--PRE: la lista es no vacia
+primerElemento :: [a] -> a
+primerElemento (x:xs) = x
+--prelude data type, no need to redefine it, possible cause of errors
+--data Maybe a = Nothing | Just a
+
+-- devuelve Nothing si la lista es vacia o just y el primer elemento
+primerElemento' :: [a] -> Maybe a
+primerElemento' [] = Nothing
+primerElemento' (x:xs) = Just x
+
+data Cola = VaciaC | Encolada Deportista Cola
+  deriving Eq
+  deriving Show
+
+fromJust :: Maybe a -> a
+fromJust (Just x) = x
+
+unaCola :: Cola
+unaCola = Encolada (Velocista 170)  (Encolada Ajedrecista VaciaC)
+
+--funcionamiento: saca al ultimo de la cola, que es el que es atendido
+atender :: Cola -> Maybe Cola
+atender VaciaC = Nothing
+atender (Encolada d VaciaC) = Just VaciaC
+atender (Encolada d (Encolada d' c)) = Just (Encolada d (fromJust  (atender (Encolada d' c)))) --tambien se puede usar la funcion del where envez del fromJust
+  where atenderColaNoVacia :: Cola -> Cola
+        atenderColaNoVacia (Encolada d' VaciaC) = VaciaC
+        atenderColaNoVacia (Encolada d' c) = Encolada d' (atenderColaNoVacia c)
+
+--version considerando que se saca al deportista del incio
+
+atender' :: Cola -> Maybe Cola
+atender' VaciaC = Nothing
+atender' (Encolada d c) = Just c
+-------------------------------------------------------{ 12 }------------------------------------------------------------------------------
+--b 
+--mete al final de la cola a alguien (pero como la anterior funcion tomaba al del final la anterior funcion parece una pila xd)
+encolar :: Deportista -> Cola -> Cola
+encolar d VaciaC = Encolada d VaciaC
+encolar d (Encolada d' c) = Encolada d' (encolar d c)
+-------------------------------------------------------{ 13 }------------------------------------------------------------------------------
+--a
+
+--type ListaAsoc = [(String,Int)] esta solucion no es la idea
+data ListaAsoc a b = Vacia' | Nodo a b (ListaAsoc a b) 
+
+ej :: ListaAsoc String Int
+ej = Nodo "Bs As" 20000000 (Nodo "Cba" 4000000 Vacia')
+
+--e
+buscar :: Eq a => ListaAsoc a b -> a -> Maybe b
+buscar Vacia' _ = Nothing
+buscar (Nodo k v la) k' | k == k' = Just v
+                        | otherwise = buscar la k'
+
+--f
+borrar :: Eq a => a -> ListaAsoc a b -> ListaAsoc a b
+borrar _ Vacia' = Vacia'
+borrar k' (Nodo k v la) | k' == k   = borrar k' la
+                        | otherwise = Nodo k v (borrar k' la)
+                        
